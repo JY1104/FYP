@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Gunner (FYP Final)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        
+        <!-- 游戏画布 -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- 📱 全屏引导层 (初始状态显示) -->
+        <div id="ui-fullscreen-prompt" class="ui-layer">
+            <div class="menu-content">
+                <h1 class="game-title">DUNGEON GUNNER</h1>
+                <p class="text-yellow" style="margin-bottom: 20px;">建议开启全屏以获得最佳体验</p>
+                <button id="btn-enter-fullscreen" class="pixel-btn">点击进入全屏游戏</button>
+            </div>
+        </div>
+
+        <!-- 📱 手机端控制 UI -->
+        <div id="ui-mobile-controls" class="hidden">
+            <!-- 左边：移动摇杆 -->
+            <div id="move-joystick-base" class="joystick-base">
+                <div id="move-joystick-knob" class="joystick-knob"></div>
+            </div>
+
+            <!-- 右边：开火/瞄准摇杆 (替代原本的 shoot-btn) -->
+            <div id="fire-joystick-base" class="joystick-base fire-theme">
+                <div id="fire-joystick-knob" class="joystick-knob"></div>
+            </div>
+        </div>
+
+        <!-- 🏠 主菜单容器 -->
+        <div id="ui-main-menu" class="ui-layer active">
+            
+            <!-- 1. 装饰层：放你拼好的那张大图 (背景透明的 PNG) -->
+            <div class="decoration-layer"></div>
+
+            <!-- 2. 内容层：标题和按钮 -->
+            <div class="menu-content">
+                <h1 class="game-title">DUNGEON GUNNER</h1>
+                <div class="menu-buttons">
+                    <button id="btn-start" class="pixel-btn">START GAME</button>
+                    <button id="btn-settings" class="pixel-btn text-gray">SETTINGS</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚙️ 设置界面 -->
+        <div id="ui-settings" class="ui-layer hidden">
+            <div class="panel-box">
+                <h2 class="menu-title">SETTINGS</h2>
+                <div class="setting-item">
+                    <label>BGM VOLUME: <span id="bgm-val">5</span></label>
+                    <input type="range" id="slider-bgm" min="0" max="10" value="5"> 
+                </div>
+                <div class="setting-item">
+                    <label>SFX VOLUME: <span id="sfx-val">5</span></label>
+                    <input type="range" id="slider-sfx" min="0" max="10" value="5">
+                </div>
+                <div class="setting-item">
+                    <button id="btn-mute" class="pixel-btn small-btn text-red">MUTE ALL</button>
+                </div>
+                <button id="btn-settings-back" class="pixel-btn mt-40">BACK</button>
+            </div>
+        </div>
+
+        <!-- 💰 商店界面 (黑市) -->
+        <div id="ui-shop" class="ui-layer hidden">
+            <div class="panel-box shop-panel">
+                <h2 class="menu-title text-yellow">BLACK MARKET</h2>
+                <div class="wallet-info">COINS: <span id="shop-wallet" class="text-yellow">0</span></div>
+                
+                <div class="shop-items-grid">
+                    <div class="shop-item">
+                        <div class="item-icon dmg-icon"></div> 
+                        <div class="item-info">
+                            <h3>DAMAGE UP</h3>
+                            <p>LV: <span id="lvl-dmg">1</span></p>
+                        </div>
+                        <button id="btn-buy-dmg" class="pixel-btn buy-btn">50 RM</button>
+                    </div>
+
+                    <div class="shop-item">
+                        <div class="item-icon hp-icon"></div>
+                        <div class="item-info">
+                            <h3>MAX HP</h3>
+                            <p>LV: <span id="lvl-hp">1</span></p>
+                        </div>
+                        <button id="btn-buy-hp" class="pixel-btn buy-btn">50 RM</button>
+                    </div>
+                </div>
+                <button id="btn-shop-back" class="pixel-btn mt-40">EXIT SHOP</button>
+            </div>
+        </div>
+
+        <!-- ⏸️ 暂停界面 -->
+        <div id="ui-pause" class="ui-layer hidden">
+            <div class="panel-box">
+                <h2 class="menu-title">PAUSED</h2>
+                <div class="menu-buttons">
+                    <button id="btn-resume" class="pixel-btn">RESUME</button>
+                    <!-- 📱 手机全屏切换 -->
+                    <button id="btn-fullscreen" class="pixel-btn text-yellow">FULLSCREEN</button>
+                    <button id="btn-pause-settings" class="pixel-btn text-gray">SETTINGS</button>
+                    <button id="btn-pause-main" class="pixel-btn text-red">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 💀 死亡结算界面 -->
+        <div id="ui-game-over" class="ui-layer hidden">
+            <div class="panel-box">
+                <h2 class="menu-title text-red">YOU DIED</h2>
+                <p class="score-text">FINAL SCORE: <span id="final-score">0</span></p>
+                <div class="menu-buttons">
+                    <button id="btn-restart" class="pixel-btn">RESTART (R)</button>
+                    <button id="btn-over-main" class="pixel-btn">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        
+
+    </div>
+</body>
+<script type="module" src="./src/main.js"></script>
+</html>

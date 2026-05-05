@@ -1,0 +1,239 @@
+* {
+    margin: 0; padding: 0; box-sizing: border-box;
+    user-select: none; -webkit-user-select: none;
+}
+
+body {
+    background-color: #000; overflow: hidden;
+    font-family: 'Courier New', Courier, monospace; 
+}
+
+#game-container { position: relative; width: 100vw; height: 100vh; }
+canvas { display: block; width: 100%; height: 100%; }
+
+/* --- 通用 UI 图层 (包含背景图占位) --- */
+.ui-layer {
+    position: absolute; 
+    top: 0; left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    overflow: hidden; /* 🌟 核心修复：严禁显示任何超出屏幕的东西 */
+    background: rgba(10, 15, 20, 0.9);
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    z-index: 10;
+}
+
+.hidden { display: none !important; }
+
+/* 居中的面板 (Settings, Shop, Records 共用) */
+.panel-box {
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 40px 60px;
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.1);
+    display: flex; flex-direction: column; align-items: center;
+}
+
+/* --- 文字与颜色 --- */
+.game-title {
+    font-family: 'Courier New', Courier, monospace; /* 或者找个更酷的像素字体 */
+    font-size: 8vw; /* 使用 vw 适配手机大小 */
+    color: #fff;
+    text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
+    animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; text-shadow: 0 0 5px #00ffcc; }
+}
+
+.menu-title { color: #fff; font-size: 3rem; margin-bottom: 40px; text-shadow: 0 2px 5px #000; }
+.text-yellow { color: #ffcc00 !important; }
+.text-gray { color: #aaaaaa !important; }
+.text-red { color: #ff4444 !important; }
+
+/* --- 按钮样式 --- */
+.menu-buttons { display: flex; flex-direction: column; gap: 20px; width: 300px; }
+
+.pixel-btn {
+    background-color: #1a1a1a; color: #fff; border: 2px solid #00ffcc;
+    padding: 15px 20px; font-size: 1.5rem; font-family: inherit; font-weight: bold;
+    cursor: pointer; transition: all 0.15s ease; width: 100%; text-align: center;
+    text-transform: uppercase;
+}
+.pixel-btn:hover { background-color: #00ffcc; color: #000; box-shadow: 0 0 20px #00ffcc; transform: scale(1.05); }
+.pixel-btn:active { transform: scale(0.95); }
+.small-btn { padding: 10px 15px; font-size: 1.2rem; }
+
+/* --- 设置菜单间距重设 --- */
+.setting-item {
+    display: flex; flex-direction: column; align-items: center; gap: 15px; 
+    margin-bottom: 35px; width: 100%; color: #fff; font-size: 1.5rem;
+}
+/* 美化原生滑块 */
+input[type=range] { width: 250px; cursor: pointer; accent-color: #00ffcc; }
+
+/* --- 商店排版 (任务 7: HTML 重新设计) --- */
+.shop-panel { width: 800px; max-width: 90%; }
+.wallet-info { font-size: 1.8rem; margin-bottom: 30px; font-weight: bold; }
+.shop-items-grid {
+    display: flex; justify-content: space-between; gap: 20px; width: 100%;
+}
+.shop-item {
+    background: #111; border: 1px solid #444; padding: 20px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 15px; flex: 1;
+}
+/* 图标占位符 (任务 8) */
+.item-icon { width: 80px; height: 80px; background: #333; border-radius: 10px; }
+.dmg-icon { border-bottom: 4px solid #ff4444; }
+.hp-icon { border-bottom: 4px solid #44ff44; }
+.fire-icon { border-bottom: 4px solid #ffcc00; }
+
+.item-info h3 { color: #fff; font-size: 1.2rem; }
+.item-info p { color: #aaa; font-size: 1rem; text-align: center; margin-top: 5px; }
+.buy-btn { font-size: 1.2rem; padding: 10px; border-color: #ffcc00; }
+.buy-btn:hover { background-color: #ffcc00; box-shadow: 0 0 15px #ffcc00; }
+
+/* 历史记录 */
+.records-list {
+    list-style: none; color: #fff; font-size: 1.5rem; line-height: 2;
+    width: 300px; text-align: center; margin-bottom: 20px;
+}
+.mt-40 { margin-top: 40px; }
+
+/* ==========================================
+   📱 手机端控制 UI 样式
+========================================== */
+#ui-mobile-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 防止遮挡 Canvas 点击 */
+    z-index: 10;
+}
+
+/* 摇杆底座 (左下角) */
+.joystick-base {
+    position: absolute;
+    width: 25vw; height: 25vw;
+    max-width: 150px; max-height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(0, 255, 204, 0.5);
+    border-radius: 50%;
+    pointer-events: auto;
+}
+
+/* 摇杆头部 (中间的小圆) */
+.joystick-knob {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 40%; height: 40%;
+    background: #00ffcc;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px #00ffcc;
+}
+/* 布局定位 */
+#move-joystick-base { bottom: 10%; left: 10%; }
+
+/* 开火摇杆定位在右边，并设为红色系 */
+#fire-joystick-base {
+    bottom: 10%;
+    right: 10%;
+    border-color: rgba(255, 68, 68, 0.5);
+}
+
+#fire-joystick-base .joystick-knob {
+    background: #ff4444;
+    box-shadow: 0 0 15px #ff4444;
+}
+#ui-main-menu {
+    position: absolute; 
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 300px; /* 你之前设置的宽度 */
+    /* 🌟 添加这一行：自动计算外边距实现居中 */
+    margin: 0 auto; 
+}
+.menu-button:hover {
+    background: rgba(0, 255, 204, 0.2);
+    box-shadow: 0 0 15px #00ffcc;
+}
+
+.ui-layer::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 200%; height: 200%; /* 放大尺寸以便滚动 */
+    background-image: url('src/assets/tile.png'); /* 使用你的地砖图 */
+    background-repeat: repeat;
+    background-size: 64px 64px; /* 保持像素感 */
+    opacity: 0.15; /* 调低透明度，不要抢镜 */
+    z-index: -1;
+    animation: bgScroll 20s linear infinite;
+}
+
+@keyframes bgScroll {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-64px, -64px); }
+}
+
+#ui-mobile-controls {
+    /* 自动适配手机刘海/挖孔屏 */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) 
+             env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.menu-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    /* 🌟 添加以下三行：用 Flex 确保内部块级元素居中 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.decoration-layer {
+    position: absolute; 
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    
+    background-image: url('src/assets/background.png'); 
+    background-size: cover;    /* 🌟 改成 cover，让海报铺满整个屏幕 */
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* 调低一点透明度，别让海报太亮抢了 START 按钮的戏 */
+    opacity: 0.8; 
+    
+    image-rendering: pixelated;  
+    pointer-events: none;        
+    z-index: 1;                  
+}
+
+/* 确保引导层在最前面 */
+#ui-fullscreen-prompt {
+    z-index: 100; 
+    background: rgba(0, 0, 0, 0.95); /* 比主菜单更黑一点，突出提示 */
+}
+
+/* 之前的隐藏类 */
+.hidden { display: none !important; }
